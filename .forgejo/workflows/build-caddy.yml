@@ -1,6 +1,7 @@
 name: Build and Push Custom Caddy
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   schedule:
@@ -8,21 +9,23 @@ on:
 
 jobs:
   build:
-    runs-on: codeberg-tiny-lazy
+    runs-on: docker
     container:
-      image: ubuntu:latest
+      image: docker:20.10.24-cli
+      env:
+        DOCKER_HOST: tcp://docker-in-docker:2375
 
     steps:
       - name: Checkout repository
         uses: https://code.forgejo.org/actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: https://code.forgejo.org/docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: https://code.forgejo.org/docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push custom Caddy image
